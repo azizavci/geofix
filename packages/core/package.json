@@ -7,5 +7,10 @@
   "types": "./src/index.ts",
   "scripts": {
     "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@geofix/schemas": "workspace:^",
+    "@geofix/types": "workspace:^",
+    "zod": "^4.3.6"
   }
 }

@@ -23,16 +23,40 @@ importers:
       '@geofix/types':
         specifier: workspace:*
         version: link:../../packages/types
+      commander:
+        specifier: ^14.0.3
+        version: 14.0.3
     devDependencies:
+      '@types/node':
+        specifier: ^22.19.17
+        version: 22.19.17
       tsx:
         specifier: ^4.19.0
         version: 4.21.0
 
-  packages/core: {}
+  packages/core:
+    dependencies:
+      '@geofix/schemas':
+        specifier: workspace:^
+        version: link:../schemas
+      '@geofix/types':
+        specifier: workspace:^
+        version: link:../types
+      zod:
+        specifier: ^4.3.6
+        version: 4.3.6
 
-  packages/schemas: {}
+  packages/schemas:
+    dependencies:
+      zod:
+        specifier: ^4.3.6
+        version: 4.3.6
 
-  packages/types: {}
+  packages/types:
+    devDependencies:
+      '@types/geojson':
+        specifier: ^7946.0.16
+        version: 7946.0.16
 
 packages:
 
@@ -192,8 +216,15 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@types/geojson@7946.0.16':
+    resolution: {integrity: sha512-6C8nqWur3j98U6+lXDfTUWIfgvZU+EumvpHKcYjujKH7woYyLj2sUmff0tRhrqM7BohUw7Pz3ZB1jj2gW9Fvmg==}
+
   '@types/node@22.19.17':
     resolution: {integrity: sha512-wGdMcf+vPYM6jikpS/qhg6WiqSV/OhG+jeeHT/KlVqxYfD40iYJf9/AE1uQxVWFvU7MipKRkRv8NSHiCGgPr8Q==}
+
+  commander@14.0.3:
+    resolution: {integrity: sha512-H+y0Jo/T1RZ9qPP4Eh1pkcQcLRglraJaSLoyOtHxu6AapkjWVCy2Sit1QQ4x3Dng8qDlSsZEet7g5Pq06MvTgw==}
+    engines: {node: '>=20'}
 
   esbuild@0.27.7:
     resolution: {integrity: sha512-IxpibTjyVnmrIQo5aqNpCgoACA/dTKLTlhMHihVHhdkxKyPO1uBBthumT0rdHmcsk9uMonIWS0m4FljWzILh3w==}
@@ -223,6 +254,9 @@ packages:
 
   undici-types@6.21.0:
     resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
+
+  zod@4.3.6:
+    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
 
 snapshots:
 
@@ -304,9 +338,13 @@ snapshots:
   '@esbuild/win32-x64@0.27.7':
     optional: true
 
+  '@types/geojson@7946.0.16': {}
+
   '@types/node@22.19.17':
     dependencies:
       undici-types: 6.21.0
+
+  commander@14.0.3: {}
 
   esbuild@0.27.7:
     optionalDependencies:
@@ -356,3 +394,5 @@ snapshots:
   typescript@5.9.3: {}
 
   undici-types@6.21.0: {}
+
+  zod@4.3.6: {}
