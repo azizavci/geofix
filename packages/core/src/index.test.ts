@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { validate } from "./index";
 
 describe("validate", () => {
-  describe("geçerli GeoJSON", () => {
+  describe("GEÇERLİ GeoJSON", () => {
     it("basit bir Point'i kabul eder", () => {
       const input = {
         type: "Point",
@@ -47,7 +47,7 @@ describe("validate", () => {
     });
   });
 
-  describe("geçersiz GeoJSON", () => {
+  describe("GEÇERSİZ GeoJSON", () => {
     it("coordinates olmayan Point'i reddeder", () => {
       const input = { type: "Point" };
       const result = validate(input);
@@ -58,7 +58,13 @@ describe("validate", () => {
     it("Polygon'da ring 4'ten az nokta içeriyorsa reddeder", () => {
       const input = {
         type: "Polygon",
-        coordinates: [[[0, 0], [1, 0], [0, 0]]],
+        coordinates: [
+          [
+            [0, 0],
+            [1, 0],
+            [0, 0],
+          ],
+        ],
       };
       expect(validate(input).valid).toBe(false);
     });
@@ -83,7 +89,7 @@ describe("validate", () => {
     });
   });
 
-  describe("hata detayları", () => {
+  describe("HATA DETAYLARI", () => {
     it("hata için path bilgisi döner", () => {
       const input = {
         type: "FeatureCollection",
@@ -98,7 +104,84 @@ describe("validate", () => {
       const result = validate(input);
       expect(result.valid).toBe(false);
       // path "features.0.geometry.coordinates" gibi bir şey olmalı
-      expect(result.errors.some((e) => e.path.includes("coordinates"))).toBe(true);
+      expect(result.errors.some((e) => e.path.includes("coordinates"))).toBe(
+        true,
+      );
+    });
+  });
+
+  describe("KOORDİNAT ARALIKLARI", () => {
+    it("boylam 180'den büyükse reddeder", () => {
+      const input = { type: "Point", coordinates: [181, 41] };
+      const result = validate(input);
+      expect(result.valid).toBe(false);
+      expect(result.errors[0].message).toMatch(/boylam/i);
+    });
+
+    it("boylam -180'den küçükse reddeder", () => {
+      const input = { type: "Point", coordinates: [-181, 41] };
+      expect(validate(input).valid).toBe(false);
+    });
+
+    it("enlem 90'dan büyükse reddeder", () => {
+      const input = { type: "Point", coordinates: [29, 91] };
+      const result = validate(input);
+      expect(result.valid).toBe(false);
+      expect(result.errors[0].message).toMatch(/enlem/i);
+    });
+
+    it("enlem -90'dan küçükse reddeder", () => {
+      const input = { type: "Point", coordinates: [29, -91] };
+      expect(validate(input).valid).toBe(false);
+    });
+
+    it("sınır değerleri (180, 90, -180, -90) kabul eder", () => {
+      expect(validate({ type: "Point", coordinates: [180, 90] }).valid).toBe(
+        true,
+      );
+      expect(validate({ type: "Point", coordinates: [-180, -90] }).valid).toBe(
+        true,
+      );
+    });
+
+    it("yüksekliği sınırlamaz", () => {
+      const input = { type: "Point", coordinates: [29, 41, 999999] };
+      expect(validate(input).valid).toBe(true);
+    });
+  });
+
+  describe("POLYGON KURALLARI", () => {
+    it("halka kapalı değilse reddeder", () => {
+      const input = {
+        type: "Polygon",
+        coordinates: [
+          [
+            [0, 0],
+            [1, 0],
+            [1, 1],
+            [0, 1],
+          ],
+        ], // 4 nokta ama kapalı değil
+      };
+      const result = validate(input);
+      expect(result.valid).toBe(false);
+      expect(result.errors[0].message).toMatch(/kapalı|aynı/i);
+    });
+
+    it("kapalı halkayı kabul eder", () => {
+      const input = {
+        type: "Polygon",
+        coordinates: [
+          [
+            [0, 0],
+            [1, 0],
+            [1, 1],
+            [0, 1],
+            [0, 0],
+          ],
+        ],
+      };
+      expect(validate(input).valid).toBe(true);
     });
   });
 });

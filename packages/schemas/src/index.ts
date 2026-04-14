@@ -7,10 +7,18 @@
 import { z } from "zod";
 
 // Position: [lon, lat] veya [lon, lat, elevation]
-export const PositionSchema = z.tuple([
-  z.number().min(-180).max(180),  
-  z.number().min(-90).max(90),     
-]).rest(z.number());               
+export const PositionSchema = z
+  .tuple([
+    z
+      .number()
+      .min(-180, { message: "Boylam -180 ile 180 arasında olmalıdır" })
+      .max(180, { message: "Boylam -180 ile 180 arasında olmalıdır" }),
+    z
+      .number()
+      .min(-90, { message: "Enlem -90 ile 90 arasında olmalıdır" })
+      .max(90, { message: "Enlem -90 ile 90 arasında olmalıdır" }),
+  ])
+  .rest(z.number());
 
 // Geometry tipleri
 export const PointSchema = z.object({
@@ -25,16 +33,35 @@ export const MultiPointSchema = z.object({
 
 export const LineStringSchema = z.object({
   type: z.literal("LineString"),
-  coordinates: z.array(PositionSchema).min(2),
+  coordinates: z
+    .array(PositionSchema)
+    .min(2, { message: "LineString en az 2 nokta içermelidir" }),
 });
 
 export const MultiLineStringSchema = z.object({
   type: z.literal("MultiLineString"),
-  coordinates: z.array(z.array(PositionSchema).min(2)),
+  coordinates: z.array(
+    z
+      .array(PositionSchema)
+      .min(2, { message: "LineString en az 2 nokta içermelidir" }),
+  ),
 });
 
 // Polygon: linear ring -> en az 4 nokta, ilk ve son aynı (RFC 7946)
-const LinearRingSchema = z.array(PositionSchema).min(4);
+export const LinearRingSchema = z
+  .array(PositionSchema)
+  .min(4, {
+    message: "Polygon halkası en az 4 nokta içermeli (ilk ve son aynı olmalı)",
+  })
+  .refine(
+    (ring) => {
+      const first = ring[0];
+      const last = ring[ring.length - 1];
+      if (!first || !last) return false;
+      return first[0] === last[0] && first[1] === last[1];
+    },
+    { message: "Polygon halkası kapalı olmalı (ilk ve son nokta aynı)" },
+  );
 
 export const PolygonSchema = z.object({
   type: z.literal("Polygon"),
