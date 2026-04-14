@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { Command } from "commander";
 import pc from "picocolors";
 import { glob } from "tinyglobby";
-import { validate } from "@geofix/core";
+import { validate,bbox } from "@geofix/core";
 import type { ValidationResult } from "@geofix/types";
 
 const program = new Command();
@@ -91,4 +91,59 @@ program
     process.exit(anyInvalid ? 1 : 0);
   });
 
-program.parse();
+
+program
+  .command("bbox")
+  .description("Bir GeoJSON dosyasının bounding box'ını hesaplar")
+  .argument("<file>", "GeoJSON dosya yolu")
+  .option("--json", "çıktıyı JSON formatında ver")
+  .action(async (file: string, options: { json?: boolean }) => {
+    let content: string;
+    try {
+      content = await readFile(file, "utf8");
+    } catch (e) {
+      console.error(pc.red(`✗ Dosya okunamadı: ${(e as Error).message}`));
+      process.exit(1);
+    }
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(content);
+    } catch (e) {
+      console.error(pc.red(`✗ Geçersiz JSON: ${(e as Error).message}`));
+      process.exit(1);
+    }
+
+    // Önce validate et
+    const validation = validate(parsed);
+    if (!validation.valid) {
+      console.error(pc.red(`✗ ${file} geçerli bir GeoJSON değil. Önce "validate" komutuyla kontrol edin.`));
+      process.exit(1);
+    }
+
+    const result = bbox(parsed as Parameters<typeof bbox>[0]);
+
+    if (result === null) {
+      if (options.json) {
+        console.log(JSON.stringify({ file, bbox: null }));
+      } else {
+        console.error(pc.yellow(`⚠ ${file} için bbox hesaplanamadı (boş geometri)`));
+      }
+      process.exit(1);
+    }
+
+    if (options.json) {
+      console.log(JSON.stringify({ file, bbox: result }, null, 2));
+    } else {
+      const [minLon, minLat, maxLon, maxLat] = result;
+      console.log(pc.bold(`${file} bounding box:`));
+      console.log(`  ${pc.cyan("minLon")} ${minLon}`);
+      console.log(`  ${pc.cyan("minLat")} ${minLat}`);
+      console.log(`  ${pc.cyan("maxLon")} ${maxLon}`);
+      console.log(`  ${pc.cyan("maxLat")} ${maxLat}`);
+      console.log(pc.dim(`\n  [${minLon}, ${minLat}, ${maxLon}, ${maxLat}]`));
+    }
+  });
+
+
+  program.parse();

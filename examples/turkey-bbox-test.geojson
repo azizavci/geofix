@@ -1,0 +1,25 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [28.9784, 41.0082] },
+      "properties": { "name": "İstanbul" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [32.8597, 39.9334] },
+      "properties": { "name": "Ankara" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [27.1428, 38.4192] },
+      "properties": { "name": "İzmir" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [43.0128, 41.0053] },
+      "properties": { "name": "Kars" }
+    }
+  ]
+}

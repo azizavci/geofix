@@ -27,3 +27,11 @@ export interface ValidationResult {
   valid: boolean;
   errors: ValidationError[];
 }
+
+/**
+ * Bounding box: [minLon, minLat, maxLon, maxLat]
+ * 3 boyutlu: [minLon, minLat, minElev, maxLon, maxLat, maxElev]
+ */
+export type BBox2D = [number, number, number, number];
+export type BBox3D = [number, number, number, number, number, number];
+export type BBox = BBox2D | BBox3D;
