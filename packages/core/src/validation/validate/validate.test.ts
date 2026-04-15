@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { validate } from "./index";
+import { validate } from "./validate";
 
 describe("validate", () => {
   describe("GEÇERLİ GeoJSON", () => {
@@ -103,10 +103,7 @@ describe("validate", () => {
       };
       const result = validate(input);
       expect(result.valid).toBe(false);
-      // path "features.0.geometry.coordinates" gibi bir şey olmalı
-      expect(result.errors.some((e) => e.path.includes("coordinates"))).toBe(
-        true,
-      );
+      expect(result.errors.some((e) => e.path.includes("coordinates"))).toBe(true);
     });
   });
 
@@ -136,12 +133,8 @@ describe("validate", () => {
     });
 
     it("sınır değerleri (180, 90, -180, -90) kabul eder", () => {
-      expect(validate({ type: "Point", coordinates: [180, 90] }).valid).toBe(
-        true,
-      );
-      expect(validate({ type: "Point", coordinates: [-180, -90] }).valid).toBe(
-        true,
-      );
+      expect(validate({ type: "Point", coordinates: [180, 90] }).valid).toBe(true);
+      expect(validate({ type: "Point", coordinates: [-180, -90] }).valid).toBe(true);
     });
 
     it("yüksekliği sınırlamaz", () => {
